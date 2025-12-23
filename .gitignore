@@ -1,0 +1,6 @@
+# Secrets
+lms_backend/secrets/
+*.json
+.env
+
+
