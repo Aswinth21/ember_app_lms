@@ -1,0 +1,23 @@
+<nav class="navbar navbar-dark bg-success px-3">
+  {{#if this.showBack}}
+    <button class="btn btn-outline-light me-3" {{action "goBack"}}>
+      ← Back
+    </button>
+  {{/if}}
+
+  <span class="mx-auto fw-bold text-white">
+    {{@title}}
+  </span>
+
+  <div class="d-flex align-items-center">
+    {{#if @user}}
+      <span class="text-white me-2">
+        {{@user.name}}
+      </span>
+    {{/if}}
+
+    <button class="btn btn-danger btn-sm" {{action "logout"}}>
+      Logout
+    </button>
+  </div>
+</nav>

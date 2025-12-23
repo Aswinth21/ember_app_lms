@@ -1,0 +1,4 @@
+<span class="user-chip">
+  {{@user.name}}
+  <button type="button" class="remove-btn" {{on "click" (fn @onRemove @user)}} aria-label="Remove user">✕</button>
+</span>

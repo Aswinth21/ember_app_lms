@@ -1,0 +1,128 @@
+<AppHeader
+  @title="Dashboard"
+  @user={{this.user}}
+  @onLogout={{action "logout"}}
+/>
+
+<div class="container mt-4">
+
+  {{#if this.isAdmin}}
+    <div class="d-flex justify-content-end gap-2 mb-4">
+      <button class="btn btn-success" {{action "goToCreate"}}>
+        + Create Course
+      </button>
+
+      <button class="btn btn-outline-primary" {{action "goToRequests"}}>
+        Manage Requests
+      </button>
+    </div>
+  {{/if}}
+
+  <h4 class="mb-3">My Courses</h4>
+
+  {{#if this.myCourses.length}}
+    <div class="row g-4">
+      {{#each this.myCourses as |course|}}
+        <div class="col-12 col-md-6 col-lg-4 d-flex">
+          <div class="card h-100 w-100 shadow-sm">
+
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                {{course.name}}
+              </h5>
+
+              <p class="card-text text-muted flex-grow-1">
+                {{course.description}}
+              </p>
+
+              <div class="mt-auto">
+                {{#link-to "courses.view" course._id class="btn btn-primary btn-sm me-2"}}
+                  View
+                {{/link-to}}
+
+                {{#if (or (eq course.role "admin") (eq course.role "creator"))}}
+                  {{#link-to "courses.edit" course._id class="btn btn-secondary btn-sm"}}
+                    Edit
+                  {{/link-to}}
+                {{/if}}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <p class="text-muted">You are not enrolled in any courses.</p>
+  {{/if}}
+
+  <hr class="my-5">
+
+  <h4 class="mb-3">Other Courses</h4>
+
+  {{#if this.otherCourses.length}}
+    <div class="row g-4">
+      {{#each this.otherCourses as |course|}}
+        <div class="col-12 col-md-6 col-lg-4 d-flex">
+          <div class="card h-100 w-100 shadow-sm">
+
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                {{course.name}}
+              </h5>
+
+              <p class="card-text text-muted flex-grow-1">
+                {{course.description}}
+              </p>
+
+              <div class="mt-auto">
+                <button class="btn btn-success btn-sm" disabled={{course.requestPending}} {{action "openEnrollPopup" course}}>
+                  {{if course.requestPending "Request Sent" "Enroll"}}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <p class="text-muted">No other courses available.</p>
+  {{/if}}
+
+</div>
+{{#if this.showEnrollPopup}}
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Enroll in Course</h5>
+          <button
+            type="button"
+            class="btn-close"
+            {{action "closeEnrollPopup"}}
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Are you sure you want to send an enrollment request for
+            <strong>{{this.selectedCourse.name}}</strong>?
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" {{action "closeEnrollPopup"}}>
+            Cancel
+          </button>
+          <button class="btn btn-success" {{action "confirmEnroll"}}>
+            Send Request
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{{/if}}
+

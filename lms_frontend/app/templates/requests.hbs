@@ -1,0 +1,51 @@
+<AppHeader
+  @title="Enrollment Requests"
+  @showBack={{true}}
+  @onLogout={{action "logout"}}
+/>
+
+<div class="container mt-4">
+
+  <h4 class="mb-3">Incoming Enrollment Requests</h4>
+
+  {{#if this.model.requests.length}}
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Student Name</th>
+          <th>Register Number</th>
+          <th>Course</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{#each this.model.requests as |req|}}
+          <tr>
+            <td>{{req.studentName}}</td>
+            <td>{{req.registerNumber}}</td>
+            <td>{{req.courseName}}</td>
+            <td>
+              <button
+                class="btn btn-success btn-sm me-2"
+                {{action "approve" req}}
+              >
+                Approve
+              </button>
+
+              <button
+                class="btn btn-danger btn-sm"
+                {{action "reject" req}}
+              >
+                Reject
+              </button>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    <p class="text-muted">No pending enrollment requests.</p>
+  {{/if}}
+
+</div>
