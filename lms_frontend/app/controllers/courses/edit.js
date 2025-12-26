@@ -59,44 +59,65 @@ export default Controller.extend({
     return this.course.admins.map(a => a._id);
   }),
 
-  filteredStudents: computed('memberSearch', 'allUsers.[]', 'memberIds.[]', function () {
-    if (!this.allUsers) return [];
-    const q = this.memberSearch.toLowerCase();
+  filteredStudents: computed(
+    'memberSearch',
+    'allUsers.[]',
+    'memberIds.[]',
+    function () {
+      if (!this.allUsers) return [];
+      const q = this.memberSearch.toLowerCase();
 
-    return this.allUsers.filter(u =>
-      u.role === 'student' &&
-      !this.memberIds.includes(u._id) &&
-      (
-        u.name.toLowerCase().includes(q) ||
-        u.registerNumber.toLowerCase().includes(q)
-      )
-    );
-  }),
+      return this.allUsers.filter(u =>
+        u.role === 'student' &&
+        !this.memberIds.includes(u._id) &&
+        (
+          u.name.toLowerCase().includes(q) ||
+          u.registerNumber.toLowerCase().includes(q)
+        )
+      );
+    }
+  ),
 
-  filteredAdmins: computed('adminSearch', 'allUsers.[]', 'adminIds.[]', function () {
-    if (!this.allUsers) return [];
-    const q = this.adminSearch.toLowerCase();
+  filteredAdmins: computed(
+    'adminSearch',
+    'allUsers.[]',
+    'adminIds.[]',
+    function () {
+      if (!this.allUsers) return [];
+      const q = this.adminSearch.toLowerCase();
 
-    return this.allUsers.filter(u =>
-      u.role === 'admin' &&
-      !this.adminIds.includes(u._id) &&
-      (
-        u.name.toLowerCase().includes(q) ||
-        u.registerNumber.toLowerCase().includes(q)
-      )
-    );
-  }),
+      return this.allUsers.filter(u =>
+        u.role === 'admin' &&
+        !this.adminIds.includes(u._id) &&
+        (
+          u.name.toLowerCase().includes(q) ||
+          u.registerNumber.toLowerCase().includes(q)
+        )
+      );
+    }
+  ),
 
   actions: {
     confirmAddContent(index) {
-      const row = this.contentsList[index];
-      if (!row.title || !row.videoUrl) return;
-      row.isNew = false;
-      this.contentsList.pushObject(this.emptyRow());
+      const updated = this.contentsList.map((c, i) => {
+        if (i === index) {
+          return {
+            title: c.title,
+            description: c.description,
+            videoUrl: c.videoUrl,
+            isNew: false
+          };
+        }
+        return c;
+      });
+
+      updated.push(this.emptyRow());
+      this.set('contentsList', A(updated));
     },
 
     removeContent(index) {
-      this.contentsList.removeAt(index);
+      const updated = this.contentsList.filter((_, i) => i !== index);
+      this.set('contentsList', A(updated));
     },
 
     addMember(user) {

@@ -27,8 +27,6 @@ async function removeCourseFromUser(userId, courseId) {
   await db.ref(`users/${userId}/courses/${courseId}`).remove();
 }
 
-/* ---------------- CREATE COURSE ---------------- */
-
 export const createCourse = async (req, res) => {
   try {
     const creatorId = String(req.user?._id);
@@ -51,9 +49,9 @@ export const createCourse = async (req, res) => {
     const courseRef = db.ref("courses").push();
     const courseId = courseRef.key;
 
-    /**
-     * ✅ CONVERT CONTENT ARRAY → OBJECT MAP
-     */
+    /* ===============================
+       CONTENTS
+       =============================== */
     const contentsObj = {};
     if (Array.isArray(contents)) {
       contents.forEach((c, index) => {
@@ -68,25 +66,26 @@ export const createCourse = async (req, res) => {
       });
     }
 
-    /**
-     * ✅ ADMINS MAP
-     */
+    /* ===============================
+       ADMINS (creator included)
+       =============================== */
     const adminsMap = {};
     admins.forEach(id => {
       if (id) adminsMap[String(id)] = true;
     });
     adminsMap[creatorId] = true;
 
-    /**
-     * ✅ USERS MAP
-     */
+    /* ===============================
+       USERS (students only)
+       =============================== */
     const usersMap = {};
     users.forEach(id => {
       if (id && !adminsMap[id]) {
         usersMap[String(id)] = true;
       }
     });
-    usersMap[creatorId] = true;
+
+    /* ❌ DO NOT ADD CREATOR TO USERS */
 
     const courseObj = {
       name,
@@ -102,21 +101,22 @@ export const createCourse = async (req, res) => {
 
     await courseRef.set(courseObj);
 
-    /**
-     * ✅ ADD COURSE TO USERS
-     */
-    const allMembers = new Set([
+    /* ===============================
+       ADD COURSE TO USERS COLLECTION
+       =============================== */
+    const allUsers = new Set([
       ...Object.keys(usersMap),
       ...Object.keys(adminsMap)
     ]);
 
-    for (const uid of allMembers) {
+    for (const uid of allUsers) {
       await db.ref(`users/${uid}/courses/${courseId}`).set({
         role: adminsMap[uid] ? "admin" : "student",
         addedAt: Date.now()
       });
     }
 
+    /* Explicit creator role */
     await db.ref(`users/${creatorId}/courses/${courseId}`).set({
       role: "creator",
       addedAt: Date.now()

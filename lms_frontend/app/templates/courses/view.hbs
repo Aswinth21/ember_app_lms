@@ -13,9 +13,10 @@
           Edit
         </button>
 
-        <button class="btn btn-outline-danger btn-sm" {{action "deleteCourse"}}>
+        <button class="btn btn-danger btn-sm" {{action send "openDeletePopup"}}>
           Delete
         </button>
+
       </div>
     {{/if}}
   </div>
@@ -30,24 +31,22 @@
     <ul class="list-group mb-4">
       {{#each-in course.contents as |id content|}}
         <li class="list-group-item d-flex justify-content-between align-items-start">
-          <div>
-            <strong>{{content.title}}</strong>
-            {{#if content.description}}
-              <div class="text-muted small">
-                {{content.description}}
-              </div>
-            {{/if}}
-          </div>
-
           {{#if content.videoUrl}}
-            <a
-              href="{{content.videoUrl}}"
-              target="_blank"
-              class="btn btn-sm btn-outline-primary"
-            >
-              GO TO
+            <a href={{content.videoUrl}} target="_blank" rel="noopener" class="fw-semibold text-decoration-none d-inline-block">
+              {{content.title}}
             </a>
+          {{else}}
+            <span class="fw-semibold">
+              {{content.title}}
+            </span>
           {{/if}}
+
+          {{#if content.description}}
+            <div class="text-muted small mt-1">
+              {{content.description}}
+            </div>
+          {{/if}}
+
         </li>
       {{/each-in}}
     </ul>
@@ -55,41 +54,35 @@
     <p class="text-muted">No contents available.</p>
   {{/if}}
 
-  {{#unless this.isMember}}
-    {{#unless this.isAdmin}}
-      <button class="btn btn-success mb-4" {{action "enroll"}}>
-        Enroll
-      </button>
-    {{/unless}}
-  {{/unless}}
+  {{#if this.isAdmin}}
+    <h5 class="mb-3">Members</h5>
 
-  <h5 class="mb-3">Members</h5>
-
-  {{#if course.members.length}}
-    <div class="table-responsive mb-4">
-      <table class="table table-bordered table-striped">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Register No</th>
-            <th>Department</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each course.members as |m index|}}
+    {{#if course.members.length}}
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered table-striped">
+          <thead class="table-light">
             <tr>
-              <td>{{inc index}}</td>
-              <td>{{m.name}}</td>
-              <td>{{m.registerNumber}}</td>
-              <td>{{m.department}}</td>
+              <th>#</th>
+              <th>Name</th>
+              <th>Register No</th>
+              <th>Department</th>
             </tr>
-          {{/each}}
-        </tbody>
-      </table>
-    </div>
-  {{else}}
-    <p class="text-muted">No members enrolled.</p>
+          </thead>
+          <tbody>
+            {{#each course.members as |m index|}}
+              <tr>
+                <td>{{inc index}}</td>
+                <td>{{m.name}}</td>
+                <td>{{m.registerNumber}}</td>
+                <td>{{m.department}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <p class="text-muted">No members enrolled.</p>
+    {{/if}}
   {{/if}}
 
   <h5 class="mb-3">Admins</h5>
@@ -122,3 +115,56 @@
   {{/if}}
 
 </div>
+{{#if this.showDeleteConfirm}}
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">Delete Course</h5>
+          <button class="btn-close" {{action "closeDeletePopup"}}></button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Are you sure you want to permanently delete
+            <strong>{{this.course.name}}</strong>?
+          </p>
+          <p class="text-muted small mb-0">
+            This action cannot be undone.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary"
+                  {{action "closeDeletePopup"}}>
+            Cancel
+          </button>
+          <button class="btn btn-danger"
+                  disabled={{this.isDeleting}}
+                  {{action "confirmDelete"}}>
+            {{if this.isDeleting "Deleting..." "Delete"}}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{{/if}}
+
+{{#if this.showDeleteSuccess}}
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content text-center">
+
+        <div class="modal-body">
+          <h5 class="text-success mb-2">Course Deleted</h5>
+          <p class="mb-0 text-muted">
+            Redirecting to dashboard…
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{{/if}}

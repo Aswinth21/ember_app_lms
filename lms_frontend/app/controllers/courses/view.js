@@ -6,6 +6,10 @@ export default Controller.extend({
   course: null,
   currentUser: null,
 
+  showDeleteConfirm: false,
+  showDeleteSuccess: false,
+  isDeleting: false,
+
   isAdmin: computed('course.admins.[]', 'currentUser._id', function () {
     if (!this.currentUser || !this.course?.admins) return false;
     return this.course.admins.some(a => a._id === this.currentUser._id);
@@ -21,25 +25,36 @@ export default Controller.extend({
       this.transitionToRoute('courses.edit', this.course._id);
     },
 
-    async deleteCourse() {
-        if (!confirm('Delete this course permanently?')) return;
+    closeDeletePopup() {
+      this.set('showDeleteConfirm', false);
+    },
 
-        const res = await fetch(
+    async confirmDelete() {
+      if (this.isDeleting) return;
+
+      this.set('isDeleting', true);
+
+      const res = await fetch(
         `${ENV.APP.API_HOST}/course/${this.course._id}`,
         {
-            method: 'DELETE',
-            credentials: 'include'
+          method: 'DELETE',
+          credentials: 'include'
         }
-        );
+      );
 
-        if (!res.ok) {
-            alert('Delete failed');
-            return;
-        }
+      this.set('isDeleting', false);
+      this.set('showDeleteConfirm', false);
 
-        alert('Course deleted');
+      if (!res.ok) {
+        alert('Delete failed'); 
+        return;
+      }
+
+      this.set('showDeleteSuccess', true);
+      setTimeout(() => {
         this.transitionToRoute('dashboard');
-  },
+      }, 1000);
+    },
 
     enroll() {
       this.transitionToRoute('courses.enroll', this.course._id);

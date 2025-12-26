@@ -1,8 +1,11 @@
 import Controller from '@ember/controller';
 import { computed } from '@ember/object';
+import { inject as service } from '@ember/service';
 import ENV from 'lms-frontend/config/environment';
 
 export default Controller.extend({
+  session: service(),
+
   memberSearch: '',
   adminSearch: '',
   selectedMembers: null,
@@ -16,15 +19,22 @@ export default Controller.extend({
 
   course: computed.reads('model.course'),
 
+  currentUserId: computed('session.user._id', function () {
+    return this.session.user?._id;
+  }),
+
   filteredMembers: computed(
     'memberSearch',
     'model.users',
     'selectedMembers.[]',
+    'currentUserId',
     function () {
       const q = this.memberSearch.toLowerCase();
+      const currentUserId = this.currentUserId;
 
       return this.model.users.filter(u =>
-        u.role === 'student' &&
+        u.role === 'student' &&                      
+        u._id !== currentUserId &&                   
         !this.selectedMembers.find(m => m._id === u._id) &&
         (
           u.name.toLowerCase().includes(q) ||
@@ -87,6 +97,8 @@ export default Controller.extend({
         return;
       }
 
+      const currentUserId = this.currentUserId;
+
       await fetch(`${ENV.APP.API_HOST}/course`, {
         method: 'POST',
         credentials: 'include',
@@ -95,7 +107,10 @@ export default Controller.extend({
           name: this.course.name.trim(),
           description: this.course.description,
           contents: this.course.contents.filter(c => c.title.trim()),
-          users: this.selectedMembers.map(u => u._id),
+
+          users: this.selectedMembers
+            .filter(u => u._id !== currentUserId)
+            .map(u => u._id),
           admins: this.selectedAdmins.map(u => u._id)
         })
       });

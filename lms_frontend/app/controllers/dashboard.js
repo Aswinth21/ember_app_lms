@@ -6,6 +6,7 @@ export default Controller.extend({
   user: null,
   myCourses: [],
   otherCourses: [],
+  testValue : 'Initial value',  
 
   showEnrollPopup: false,
   selectedCourse: null,
@@ -15,7 +16,17 @@ export default Controller.extend({
     return this.user?.role === 'admin';
   }),
 
+  deactivate()
+  {
+    console.log(this.testValue);
+  },
+
   actions: {
+    updateTestValue(value) {
+      console.log('Controller received:', value);
+      this.set('testValue', value);
+    },
+
     logout() {
       if (this.isLoggingOut) return;
 
@@ -26,7 +37,7 @@ export default Controller.extend({
         credentials: 'include'
       }).finally(() => {
         this.set('isLoggingOut', false);
-        this.transitionToRoute('login');
+        this.transitionToRoute('/');
       });
     },
 

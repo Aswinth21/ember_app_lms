@@ -56,24 +56,23 @@ export default Route.extend({
   },
 
   actions: {
-    refreshModel() {
-      this.refresh();
-    },
+    logout() {
+      console.log("working");
+      if (this.isLoggingOut) return;
 
-    goToCreate() {
-      this.transitionTo('courses.create');
-    },
+      this.set('isLoggingOut', true);
 
-    goToRequests() {
-      this.transitionTo('requests');
-    },
-
-    async logout() {
-      await fetch(`${ENV.APP.API_HOST}/auth/logout`, {
+      fetch(`${ENV.APP.API_HOST}/auth/logout`, {
         method: 'POST',
         credentials: 'include'
+      }).finally(() => {
+        this.set('isLoggingOut', false);
+        this.transitionTo('/');
       });
-      this.transitionTo('login');
+    },
+
+    refreshModel() {
+      this.refresh();
     }
   }
 });

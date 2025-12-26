@@ -1,4 +1,3 @@
-// app/routes/courses/view.js
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 
@@ -6,6 +5,14 @@ const API_HOST = 'http://localhost:8000/api';
 
 export default Route.extend({
   session: service(),
+
+  beforeModel()
+  {
+    if(!this.session.user)
+    {
+      this.transitionTo('/');
+    }
+  },
 
   async model(params) {
     const courseRes = await fetch(
@@ -24,7 +31,7 @@ export default Route.extend({
 
     return {
       course,
-      currentUser: this.session.user
+      currentUser: this.session.user,
     };
   },
 
@@ -34,7 +41,12 @@ export default Route.extend({
   },
 
   actions: {
+    openDeletePopup() {
+      this.controller.set('showDeleteConfirm', true);
+    },
+
     error() {
+      console.log(1);
       this.transitionTo('dashboard');
       return false;
     }

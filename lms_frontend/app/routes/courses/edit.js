@@ -28,8 +28,12 @@ export default Route.extend({
 
   setupController(controller, model) {
     this._super(controller, model);
+
     controller.set('course', model);
     controller.set('currentUserId', this.session.user._id);
+    const parentController = this.controllerFor('courses.view');
+    controller.set('currentUser', parentController.currentUser);
+    console.log(parentController.currentUser);
     controller.initializeContents();
     controller.loadUsers();
   }
